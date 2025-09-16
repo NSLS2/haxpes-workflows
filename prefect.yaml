@@ -17,8 +17,8 @@ pull:
   - prefect.deployments.steps.set_working_directory:
       directory: /repo
   - prefect.deployments.steps.git_clone:
-      repository: https://github.com/NSLS-II-SST/workflows-haxpes.git
-      branch: prefect3-pixi-upgrade
+      repository: https://github.com/nsls2/haxpes-workflows.git
+      branch: main
 
 # the deployments section allows you to provide configuration for deploying flows
 deployments:
@@ -35,7 +35,7 @@ deployments:
         env:
           TILED_SITE_PROFILES: /nsls2/software/etc/tiled/profiles
           TILED_API_KEY: "{{ prefect.blocks.secret.tiled-haxpes-api-key }}"
-        image: ghcr.io/nsls2/haxpes-workflow-prefect3:main
+        image: ghcr.io/nsls2/haxpes-workflows:main
         network: slirp4netns
         volumes:
           - /nsls2/data/sst/proposals:/nsls2/data/sst/proposals
