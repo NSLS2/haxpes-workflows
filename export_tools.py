@@ -1,6 +1,7 @@
 from numpy import column_stack, transpose
 from tiled.client import from_profile
 
+
 def get_proposal_path(run):
     proposal = run.start.get("proposal", {}).get("proposal_id", None)
     is_commissioning = (
@@ -114,7 +115,6 @@ def get_general_metadata(run):
     metadata["Sample Rotation"] = get_baseline(run, "haxpes_manipulator_r")
 
     return metadata
-
 
 
 def get_metadata_xps(run):
@@ -340,78 +340,81 @@ def sanitize_filename(filename):
     filename = re.sub(r"[_\s]+", "_", filename)
     return filename
 
+
 def get_resPES_data(run):
     data_dictionary = {}
-    
+
     metadata = get_general_metadata(run)
     try:
-        peak_config = run.primary.descriptors[0]['configuration']['PeakAnalyzer']['data']
+        peak_config = run.primary.descriptors[0]["configuration"]["PeakAnalyzer"][
+            "data"
+        ]
         for peakkey in peak_config.keys():
-            out_key = peakkey.replace("_"," ")
+            out_key = peakkey.replace("_", " ")
             metadata[out_key] = str(peak_config[peakkey])
     except KeyError:
-        metadata['Peak Analyzer'] = "Not Used"
-    metadata['I0 Integration Time'] = str(run.primary.descriptors[0]['configuration']['I0 ADC']['data']['I0 ADC_exposure_time'])
+        metadata["Peak Analyzer"] = "Not Used"
+    metadata["I0 Integration Time"] = str(
+        run.primary.descriptors[0]["configuration"]["I0 ADC"]["data"][
+            "I0 ADC_exposure_time"
+        ]
+    )
 
     data_dictionary["Metadata"] = metadata
 
-    if 'shape' not in run.start.keys():
-        return data_dictionary #just give up ...
-    if 'PeakAnalyzer' not in run.start['detectors']:
-        return data_dictionary #like I said ...
+    if "shape" not in run.start.keys():
+        return data_dictionary  # just give up ...
+    if "PeakAnalyzer" not in run.start["detectors"]:
+        return data_dictionary  # like I said ...
 
-    beam_type = run.baseline.config['beam_selection']['beam_selection'].read()[0]
+    beam_type = run.baseline.config["beam_selection"]["beam_selection"].read()[0]
     if beam_type == "Tender":
         en_key = "SST2 Energy_energy"
     elif beam_type == "Soft":
-        en_key = "en_energy" ### check this !!!
+        en_key = "en_energy"  ### check this !!!
     else:
-        return data_dictionary #again, just give up ...
+        return data_dictionary  # again, just give up ...
 
-    n_hv = run.start['shape'][0]
-    n_sweep = run.start['shape'][1]
+    n_hv = run.start["shape"][0]
+    n_sweep = run.start["shape"][1]
 
-    n_KE = run.primary.read()['PeakAnalyzer_xaxis'].data.shape[1]
+    n_KE = run.primary.read()["PeakAnalyzer_xaxis"].data.shape[1]
 
-    hv = run.primary.read()[en_key].data.reshape(n_hv,n_sweep)
+    hv = run.primary.read()[en_key].data.reshape(n_hv, n_sweep)
     hv = hv.mean(axis=1)
 
-    sweep = run.primary.read()['Exposure'].data.reshape(n_hv,n_sweep) #check motor name
+    sweep = run.primary.read()["Exposure"].data.reshape(
+        n_hv, n_sweep
+    )  # check motor name
     sweep = sweep.mean(axis=0)
 
-    KE = run.primary.read()['PeakAnalyzer_xaxis'].data.reshape(n_hv,n_sweep,n_KE)
-    KE = KE.mean(axis=(0,1))
+    KE = run.primary.read()["PeakAnalyzer_xaxis"].data.reshape(n_hv, n_sweep, n_KE)
+    KE = KE.mean(axis=(0, 1))
 
-    edc = run.primary.read()['PeakAnalyzer_edc'].data.reshape(n_hv,n_sweep,n_KE)
+    edc = run.primary.read()["PeakAnalyzer_edc"].data.reshape(n_hv, n_sweep, n_KE)
     edc = edc.mean(axis=1)
     edc_norm = empty(edc.shape)
     for n in range(n_hv):
-        edc_norm[n,:] = edc[n,:] / edc[n,-20:].mean()
+        edc_norm[n, :] = edc[n, :] / edc[n, -20:].mean()
 
-    DataSets = {
-        'edc_raw': edc,
-        'edc_norm': edc_norm
-    }
+    DataSets = {"edc_raw": edc, "edc_norm": edc_norm}
 
     data_dictionary["DataSets"] = DataSets
 
     signals = {}
-    for det in run.start['detectors']:
-        if det != 'PeakAnalyzer':
-            detdat = run.primary.read()[det].data.reshape(n_hv,n_sweep)
+    for det in run.start["detectors"]:
+        if det != "PeakAnalyzer":
+            detdat = run.primary.read()[det].data.reshape(n_hv, n_sweep)
             detdat = detdat.mean(axis=1)
             signals[det] = detdat
 
-    AEY = run.primary.read()['PeakAnalyzer_total_counts'].data.reshape(n_hv,n_sweep)
+    AEY = run.primary.read()["PeakAnalyzer_total_counts"].data.reshape(n_hv, n_sweep)
     AEY = AEY.mean(axis=1)
     signals["AugerYield"] = AEY
 
     data_dictionary["Signals"] = signals
 
-    axes = {
-        "Photon Energy": hv,
-        "Kinetic Energy": KE
-    }
+    axes = {"Photon Energy": hv, "Kinetic Energy": KE}
 
     data_dictionary["Axes"] = axes
 

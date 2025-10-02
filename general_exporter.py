@@ -1,15 +1,14 @@
 # from export_tools import get_proposal_path
-from file_exporter import (
-    export_xas, 
-    export_peak_xps, 
-    export_generic_1D, 
-    export_ses_xps, 
-    export_resPES
-    )
 from prefect import flow
 
 from export_tools import initialize_tiled_client
-from file_exporter import export_generic_1D, export_peak_xps, export_ses_xps, export_xas
+from file_exporter import (
+    export_generic_1D,
+    export_peak_xps,
+    export_resPES,
+    export_ses_xps,
+    export_xas,
+)
 
 
 def export_switchboard(uid, beamline_acronym="haxpes"):
@@ -25,12 +24,13 @@ def export_switchboard(uid, beamline_acronym="haxpes"):
                         ses_export(uid)
                 elif run.start["scantype"] == "xas":
                     xas_export(uid)
-                elif run.start['scantype'] == "resPES":
+                elif run.start["scantype"] == "resPES":
                     resPES_export(uid)
                 else:
                     generic_export(uid)
             else:
                 generic_export(uid)
+
 
 @flow
 def xas_export(uid, beamline_acronym="haxpes"):
@@ -51,6 +51,7 @@ def generic_export(uid, beamline_acronym="haxpes"):
 def ses_export(uid, beamline_acronym="haxpes"):
     export_ses_xps(uid, beamline_acronym)
 
-@flow 
-def resPES_export(uid,beamline_acronym = "haxpes"):
+
+@flow
+def resPES_export(uid, beamline_acronym="haxpes"):
     export_resPES(uid, beamline_acronym)
