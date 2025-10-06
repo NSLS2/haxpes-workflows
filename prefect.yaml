@@ -23,7 +23,7 @@ pull:
 # the deployments section allows you to provide configuration for deploying flows
 deployments:
   - name: haxpes-end-of-run-workflow-docker
-    version: 0.1.0
+    version: 0.1.1
     tags: [haxpes]
     description: Deploy the updated Docker image
     entrypoint: end_of_run_workflow.py:end_of_run_workflow
@@ -34,7 +34,6 @@ deployments:
       job_variables:
         env:
           TILED_SITE_PROFILES: /nsls2/software/etc/tiled/profiles
-          TILED_API_KEY: "{{ prefect.blocks.secret.tiled-haxpes-api-key }}"
         image: ghcr.io/nsls2/haxpes-workflows:main
         network: slirp4netns
         volumes:
