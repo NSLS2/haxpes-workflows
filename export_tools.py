@@ -1,5 +1,5 @@
 from numpy import column_stack, transpose
-from tiled.client import from_profile
+from utils import get_tiled_client
 
 
 def get_proposal_path(run):
@@ -273,7 +273,7 @@ def get_generic_1d_data(run):
 
 
 def initialize_tiled_client(beamline_acronym):
-    return from_profile("nsls2")[beamline_acronym]["raw"]
+    return get_tiled_client()["raw"]
 
 
 def generate_file_name(run, extension):
