@@ -1,16 +1,14 @@
 import time
 
+from export_tools import initialize_tiled_client
 from prefect import flow, get_run_logger, task
-from prefect.blocks.system import Secret
-from tiled.client import from_profile
 
 
 @task(retries=2, retry_delay_seconds=10)
 def read_all_streams(uid, beamline_acronym="haxpes"):
     logger = get_run_logger()
-    api_key = Secret.load(f"tiled-{beamline_acronym}-api-key", _sync=True).get()
-    tiled_client = from_profile("nsls2", api_key=api_key)[beamline_acronym]
-    run = tiled_client["raw"][uid]
+    tiled_client = initialize_tiled_client(beamline_acronym)
+    run = tiled_client[uid]
     logger.info(f"Validating uid {run.start['uid']}")
     start_time = time.monotonic()
     for stream in run:
