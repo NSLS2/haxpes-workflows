@@ -1,5 +1,8 @@
+import re
+
 from numpy import column_stack, transpose
-from utils import get_tiled_client
+from prefect.blocks.system import Secret
+from tiled.client import from_profile
 
 
 def get_proposal_path(run):
@@ -273,7 +276,8 @@ def get_generic_1d_data(run):
 
 
 def initialize_tiled_client(beamline_acronym):
-    return get_tiled_client()["raw"]
+    api_key = Secret.load(f"tiled-{beamline_acronym}-api-key", _sync=True).get()
+    return from_profile("nsls2", api_key=api_key)[beamline_acronym]["raw"]
 
 
 def generate_file_name(run, extension):
