@@ -1,7 +1,8 @@
 import time
 
-from export_tools import initialize_tiled_client
 from prefect import flow, get_run_logger, task
+
+from export_tools import initialize_tiled_client
 
 
 @task(retries=2, retry_delay_seconds=10)
