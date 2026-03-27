@@ -2,20 +2,25 @@ import time
 
 from prefect import flow, get_run_logger, task
 
-from export_tools import initialize_tiled_client
+from export_tools import get_run
+
+
+@task
+def read_stream(run, stream):
+    stream_data = run[stream].read()
+    return stream_data
 
 
 @task(retries=2, retry_delay_seconds=10)
-def read_all_streams(uid, beamline_acronym="haxpes"):
+def read_all_streams(uid, api_key=None):
     logger = get_run_logger()
-    tiled_client = initialize_tiled_client(beamline_acronym)
-    run = tiled_client[uid]
-    logger.info(f"Validating uid {run.start['uid']}")
+    run = get_run(uid, api_key=api_key)
+    logger.info(f"Validating uid {uid}")
     start_time = time.monotonic()
     for stream in run:
         logger.info(f"{stream}:")
         stream_start_time = time.monotonic()
-        stream_data = run[stream].read()
+        stream_data = read_stream(run, stream)
         stream_elapsed_time = time.monotonic() - stream_start_time
         logger.info(f"{stream} elapsed_time = {stream_elapsed_time}")
         logger.info(f"{stream} nbytes = {stream_data.nbytes:_}")
@@ -24,5 +29,5 @@ def read_all_streams(uid, beamline_acronym="haxpes"):
 
 
 @flow
-def general_data_validation(uid, beamline_acronym="haxpes"):
-    read_all_streams(uid, beamline_acronym)
+def data_validation(uid, api_key=None):
+    read_all_streams(uid, api_key=api_key)
