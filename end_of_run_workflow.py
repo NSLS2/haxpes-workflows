@@ -1,9 +1,10 @@
 import os
+
+from dotenv import load_dotenv
 from prefect import flow, get_run_logger, task
 
 from data_validation import data_validation
 from general_exporter import export_switchboard
-from dotenv import load_dotenv
 
 
 def get_api_key_from_env():

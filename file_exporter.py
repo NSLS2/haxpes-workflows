@@ -2,10 +2,10 @@ import shutil
 from glob import glob
 from os import makedirs
 from os.path import exists, splitext
-import h5py
 
+import h5py
 import numpy as np
-from prefect import task, get_run_logger
+from prefect import get_run_logger, task
 
 from export_tools import *
 
