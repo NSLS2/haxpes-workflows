@@ -25,5 +25,5 @@ def end_of_run_workflow(stop_doc, api_key=None, dry_run=False):
         api_key = get_api_key_from_env()
     uid = stop_doc["run_start"]
     data_validation(uid, api_key=api_key)
-    export_switchboard(uid, beamline_acronym="haxpes")
+    export_switchboard(uid, api_key=api_key, dry_run=dry_run)
     log_completion()

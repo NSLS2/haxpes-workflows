@@ -79,7 +79,7 @@ def get_general_metadata(run):
     try:
         metadata["Proposal"] = str(run.start["proposal"]["proposal_id"])
     except:
-        metadata["Proposal"] = unknown
+        metadata["Proposal"] = "Unknown"
 
     metadata["UID"] = get_md(run, "uid")
     metadata["Start Date/Time"] = get_md(run, "start_datetime")
