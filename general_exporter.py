@@ -1,5 +1,5 @@
 # from export_tools import get_proposal_path
-from prefect import flow
+from prefect import flow, get_run_logger
 
 from export_tools import get_run
 from file_exporter import (
@@ -12,6 +12,7 @@ from file_exporter import (
 
 
 def export_switchboard(uid, api_key=None, dry_run=False):
+    logger = get_run_logger()
     run = get_run(uid, api_key=api_key)
     if run.stop["exit_status"] != "abort":
         if run.start["autoexport"]:
@@ -29,8 +30,10 @@ def export_switchboard(uid, api_key=None, dry_run=False):
                     generic_export(uid, api_key=api_key, dry_run=dry_run)
             else:
                 generic_export(uid, api_key=api_key, dry_run=dry_run)
+    else:
+        logger.info("Run was aborted, skipping exports")
 
-
+     
 @flow
 def xas_export(uid, api_key=None, dry_run=False):
     export_xas(uid, api_key=api_key, dry_run=dry_run)
