@@ -5,13 +5,13 @@ from prefect import flow, get_run_logger, task
 from export_tools import get_run
 
 
-@task
+@task(retries=2, retry_delay_seconds=10)
 def read_stream(run, stream):
     stream_data = run[stream].read()
     return stream_data
 
 
-@flow(retries=2, retry_delay_seconds=10)
+@flow
 def data_validation(uid, api_key=None):
     logger = get_run_logger()
     run = get_run(uid, api_key=api_key)
