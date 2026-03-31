@@ -65,13 +65,6 @@ def get_photon_energy(run, default=0):
     return str(en)
 
 
-def get_scantype(run):
-    if "scantype" in run.start.keys():
-        return run.start["scantype"]
-    else:
-        return None
-
-
 def get_general_metadata(run):
 
     metadata = get_mono_md(run)
