@@ -23,6 +23,8 @@ def export_switchboard(uid, api_key=None, dry_run=False):
                         export_peak_xps(uid, api_key=api_key, dry_run=dry_run)
                     elif run.start["analyzer_type"] == "ses":
                         export_ses_xps(uid, api_key=api_key, dry_run=dry_run)
+                    else:
+                        logger.info(f"Unknown analyzer type {run.start['analyzer_type']} for XPS scan")
                 elif run.start["scantype"] == "xas":
                     export_xas(uid, api_key=api_key, dry_run=dry_run)
                 elif run.start["scantype"] == "resPES":
