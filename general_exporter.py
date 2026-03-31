@@ -1,7 +1,7 @@
 # from export_tools import get_proposal_path
-from prefect import flow
+from prefect import flow, get_run_logger
 
-from export_tools import initialize_tiled_client
+from export_tools import get_run
 from file_exporter import (
     export_generic_1D,
     export_peak_xps,
@@ -11,47 +11,29 @@ from file_exporter import (
 )
 
 
-def export_switchboard(uid, beamline_acronym="haxpes"):
-    c = initialize_tiled_client(beamline_acronym)
-    run = c[uid]
+@flow
+def export_switchboard(uid, api_key=None, dry_run=False):
+    logger = get_run_logger()
+    run = get_run(uid, api_key=api_key)
     if run.stop["exit_status"] != "abort":
         if run.start["autoexport"]:
             if "scantype" in run.start.keys():
                 if run.start["scantype"] == "xps":
                     if run.start["analyzer_type"] == "peak":
-                        peak_export(uid)
+                        export_peak_xps(uid, api_key=api_key, dry_run=dry_run)
                     elif run.start["analyzer_type"] == "ses":
-                        ses_export(uid)
+                        export_ses_xps(uid, api_key=api_key, dry_run=dry_run)
+                    else:
+                        logger.info(
+                            f"Unknown analyzer type {run.start['analyzer_type']} for XPS scan"
+                        )
                 elif run.start["scantype"] == "xas":
-                    xas_export(uid)
+                    export_xas(uid, api_key=api_key, dry_run=dry_run)
                 elif run.start["scantype"] == "resPES":
-                    resPES_export(uid)
+                    export_resPES(uid, api_key=api_key, dry_run=dry_run)
                 else:
-                    generic_export(uid)
+                    export_generic_1D(uid, api_key=api_key, dry_run=dry_run)
             else:
-                generic_export(uid)
-
-
-@flow
-def xas_export(uid, beamline_acronym="haxpes"):
-    export_xas(uid, beamline_acronym)
-
-
-@flow
-def peak_export(uid, beamline_acronym="haxpes"):
-    export_peak_xps(uid, beamline_acronym)
-
-
-@flow
-def generic_export(uid, beamline_acronym="haxpes"):
-    export_generic_1D(uid, beamline_acronym)
-
-
-@flow
-def ses_export(uid, beamline_acronym="haxpes"):
-    export_ses_xps(uid, beamline_acronym)
-
-
-@flow
-def resPES_export(uid, beamline_acronym="haxpes"):
-    export_resPES(uid, beamline_acronym)
+                export_generic_1D(uid, api_key=api_key, dry_run=dry_run)
+    else:
+        logger.info("Run was aborted, skipping exports")

@@ -1,8 +1,8 @@
 import re
 
 from numpy import column_stack, transpose
-from prefect.blocks.system import Secret
-from tiled.client import from_profile
+from prefect import task
+from tiled.client import from_uri
 
 
 def get_proposal_path(run):
@@ -65,13 +65,6 @@ def get_photon_energy(run, default=0):
     return str(en)
 
 
-def get_scantype(run):
-    if "scantype" in run.start.keys():
-        return run.start["scantype"]
-    else:
-        return None
-
-
 def get_general_metadata(run):
 
     metadata = get_mono_md(run)
@@ -79,7 +72,7 @@ def get_general_metadata(run):
     try:
         metadata["Proposal"] = str(run.start["proposal"]["proposal_id"])
     except:
-        metadata["Proposal"] = unknown
+        metadata["Proposal"] = "Unknown"
 
     metadata["UID"] = get_md(run, "uid")
     metadata["Start Date/Time"] = get_md(run, "start_datetime")
@@ -275,9 +268,11 @@ def get_generic_1d_data(run):
     return data_array
 
 
-def initialize_tiled_client(beamline_acronym):
-    api_key = Secret.load(f"tiled-{beamline_acronym}-api-key", _sync=True).get()
-    return from_profile("nsls2", api_key=api_key)[beamline_acronym]["raw"]
+@task(retries=2, retry_delay_seconds=10)
+def get_run(uid, api_key=None):
+    tiled_client = from_uri("https://tiled.nsls2.bnl.gov", api_key=api_key)
+    run = tiled_client["haxpes/raw"][uid]
+    return run
 
 
 def generate_file_name(run, extension):
