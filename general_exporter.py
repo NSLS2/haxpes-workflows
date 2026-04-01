@@ -35,5 +35,7 @@ def export_switchboard(uid, api_key=None, dry_run=False):
                     export_generic_1D(uid, api_key=api_key, dry_run=dry_run)
             else:
                 export_generic_1D(uid, api_key=api_key, dry_run=dry_run)
+        else:
+            logger.info("Autoexport is disabled for this run, skipping exports")
     else:
         logger.info("Run was aborted, skipping exports")
