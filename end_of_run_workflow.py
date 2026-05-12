@@ -6,9 +6,8 @@ from prefect import flow, get_run_logger, task
 from prefect.blocks.notifications import SlackWebhook
 from prefect.context import FlowRunContext
 from prefect.settings import PREFECT_UI_URL
-from data_validation import get_run, get_api_key_from_env
 
-from data_validation import data_validation
+from data_validation import data_validation, get_api_key_from_env, get_run
 from general_exporter import export_switchboard
 
 CATALOG_NAME = "haxpes"
