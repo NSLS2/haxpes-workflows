@@ -20,7 +20,7 @@ def get_run(uid, api_key=None):
     if not api_key:
         api_key = get_api_key_from_env()
     cl = from_uri("https://tiled.nsls2.bnl.gov", api_key=api_key)
-    run = cl[f"{BEAMLINE_OR_ENDSTATION}/raw"][uid]
+    run = cl["haxpes/raw"][uid]
     return run
 
 
