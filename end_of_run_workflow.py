@@ -36,17 +36,18 @@ def slack(func):
         # Get the uid.
         uid = stop_doc["run_start"]
 
-        # Get the scan_id.
-        run = get_run(uid, api_key=api_key)
-        scan_id = run.start["scan_id"]
-
-        # Send a message to mon-bluesky if bluesky-run failed.
-        if stop_doc.get("exit_status") == "fail":
-            mon_bluesky.notify(
-                f":bangbang: {CATALOG_NAME} bluesky-run failed. (*{flow_run_name}*)\n ```run_start: {uid}\nscan_id: {scan_id}``` ```reason: {stop_doc.get('reason', 'none')}```"
-            )
-
         try:
+            # Get the scan_id.
+            run = get_run(uid, api_key=api_key)
+            scan_id = run.start["scan_id"]
+
+            # Send a message to mon-bluesky if bluesky-run failed.
+            if stop_doc.get("exit_status") == "fail":
+                mon_bluesky.notify(
+                    f":bangbang: {CATALOG_NAME} bluesky-run failed. (*{flow_run_name}*)\n ```run_start: {uid}\nscan_id: {scan_id}``` ```reason: {stop_doc.get('reason', 'none')}```"
+                )
+                return
+
             result = func(stop_doc, api_key=api_key, dry_run=dry_run)
 
             # Send a message to mon-prefect-haxpes if flow-run is successful.
