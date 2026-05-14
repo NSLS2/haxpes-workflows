@@ -55,7 +55,7 @@ def slack(func):
                     + f"flow-run/{flow_run.id}|the flow run link> (*{flow_run_name}*)\n ```run_start: {uid}\n```{tb[-1]}```"
                 )
                 mon_prefect_spec.notify(program_message)
-                raise
+                return
 
             # Send a message to mon-bluesky if bluesky-run failed.
             if stop_doc.get("exit_status") == "fail":
