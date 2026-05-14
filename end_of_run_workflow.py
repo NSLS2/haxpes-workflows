@@ -38,8 +38,24 @@ def slack(func):
 
         try:
             # Get the scan_id.
-            run = get_run(uid, api_key=api_key)
-            scan_id = run.start["scan_id"]
+            try:
+                run = get_run(uid, api_key=api_key)
+                scan_id = run.start["scan_id"]
+            except Exception as e:
+                tb = traceback.format_exception_only(e)
+
+                # Send a message to mon-prefect-haxpes, mon-prefect if flow-run failed.
+                message = f":bangbang: {CATALOG_NAME} flow-run failed. (*{flow_run_name}*)\n ```run_start: {uid}\n```{tb[-1]}```"
+                mon_prefect.notify(message)
+                mon_prefect_haxpes.notify(message)
+                flow_run = FlowRunContext.get().flow_run
+                # Add link to flow-run for the message to mon-prefect-spec.
+                program_message = (
+                    f":bangbang: {CATALOG_NAME} flow-run failed. <{PREFECT_UI_URL.value()}/flow-runs/"
+                    + f"flow-run/{flow_run.id}|the flow run link> (*{flow_run_name}*)\n ```run_start: {uid}\n```{tb[-1]}```"
+                )
+                mon_prefect_spec.notify(program_message)
+                raise
 
             # Send a message to mon-bluesky if bluesky-run failed.
             if stop_doc.get("exit_status") == "fail":
