@@ -55,7 +55,7 @@ def get_photon_energy(run, default=0):
     if "beam_selection" in run.baseline.data.keys():
         beamselect = run.baseline.data["beam_selection"].read()[0]
         if beamselect == "Tender":
-            en = round(run.baseline.data["SST2 Energy_energy"].read().mean(), 1)
+            en = round(run.baseline.data["SST2 Energy_flycontrol"].read().mean(), 1)
         elif beamselect == "Soft":
             en = round(run.baseline.data["en_energy"].read().mean(), 1)
         else:
@@ -234,7 +234,7 @@ def write_header_only(fpath, header):
 
 
 def get_xas_data(run):
-    data_array = run.primary.read()["SST2 Energy_energy"].data
+    data_array = run.primary.read()["SST2 Energy_flycontrol"].data
 
     detlist = run.start["detectors"]
     for det in detlist:
@@ -368,7 +368,7 @@ def get_resPES_data(run):
 
     beam_type = run.baseline.config["beam_selection"]["beam_selection"].read()[0]
     if beam_type == "Tender":
-        en_key = "SST2 Energy_energy"
+        en_key = "SST2 Energy_flycontrol"
     elif beam_type == "Soft":
         en_key = "en_energy"  ### check this !!!
     else:
